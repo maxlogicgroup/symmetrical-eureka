@@ -24,6 +24,8 @@ app.layout = html.Div([
     generate_table(df)
 ])
 
+if __name__ == '__main__':
+     app.run_server(host="0.0.0.0", debug=True, port=8080)
 
 #TODO
 #if __name__ == "__main__":
