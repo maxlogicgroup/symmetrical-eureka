@@ -1,26 +1,32 @@
-from dash import Dash, dcc, html, Input, Output
-import os
+from dash import Dash, html, dcc
+import plotly.express as px
+import pandas as pd
 
+app = Dash(__name__)
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+# assume you have a "long-form" data frame
+# see https://plotly.com/python/px-arguments/ for more options
+df = pd.DataFrame({
+    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
+    "Amount": [4, 1, 2, 2, 4, 5],
+    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
+})
 
-app = Dash(__name__, external_stylesheets=external_stylesheets)
+fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
 
-server = app.server
+app.layout = html.Div(children=[
+    html.H1(children='Hello Dash'),
 
-app.layout = html.Div([
-    html.H2('Hello World'),
-    dcc.Dropdown(['LA', 'NYC', 'MTL'],
-        'LA',
-        id='dropdown'
-    ),
-    html.Div(id='display-value')
+    html.Div(children='''
+        Dash: A web application framework for your data.
+    '''),
+
+    dcc.Graph(
+        id='example-graph',
+        figure=fig
+    )
 ])
 
-@app.callback(Output('display-value', 'children'),
-                [Input('dropdown', 'value')])
-def display_value(value):
-    return f'You have selected {value}'
 
 if __name__ == '__main__':
     app.run_server(host="0.0.0.0", debug=True, port=8080)
