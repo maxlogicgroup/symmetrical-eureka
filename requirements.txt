@@ -1,3 +1,6 @@
 dash
 gunicorn
 plotly
+dash-core-components
+dash-html-components
+dash-renderer
