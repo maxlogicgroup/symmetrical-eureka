@@ -1,46 +1,38 @@
-# Run this app with `python app.py` and
-# visit http://127.0.0.1:8080/ in your web browser.
+from dash import Dash, dcc, html, Input, Output
+import plotly.express as px
 
-from dash import Dash, html, dcc
+import pandas as pd
+
+df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv')
 
 app = Dash(__name__)
 
 app.layout = html.Div([
-    html.Div(children=[
-        html.Label('Dropdown'),
-        dcc.Dropdown(['New York City', 'Montréal', 'San Francisco'], 'Montréal'),
+    dcc.Graph(id='graph-with-slider'),
+    dcc.Slider(
+        df['year'].min(),
+        df['year'].max(),
+        step=None,
+        value=df['year'].min(),
+        marks={str(year): str(year) for year in df['year'].unique()},
+        id='year-slider'
+    )
+])
 
-        html.Br(),
-        html.Label('Multi-Select Dropdown'),
-        dcc.Dropdown(['New York City', 'Montréal', 'San Francisco'],
-                     ['Montréal', 'San Francisco'],
-                     multi=True),
 
-        html.Br(),
-        html.Label('Radio Items'),
-        dcc.RadioItems(['New York City', 'Montréal', 'San Francisco'], 'Montréal'),
-    ], style={'padding': 10, 'flex': 1}),
+@app.callback(
+    Output('graph-with-slider', 'figure'),
+    Input('year-slider', 'value'))
+def update_figure(selected_year):
+    filtered_df = df[df.year == selected_year]
 
-    html.Div(children=[
-        html.Label('Checkboxes'),
-        dcc.Checklist(['New York City', 'Montréal', 'San Francisco'],
-                      ['Montréal', 'San Francisco']
-        ),
+    fig = px.scatter(filtered_df, x="gdpPercap", y="lifeExp",
+                     size="pop", color="continent", hover_name="country",
+                     log_x=True, size_max=55)
 
-        html.Br(),
-        html.Label('Text Input'),
-        dcc.Input(value='MTL', type='text'),
+    fig.update_layout(transition_duration=500)
 
-        html.Br(),
-        html.Label('Slider'),
-        dcc.Slider(
-            min=0,
-            max=9,
-            marks={i: f'Label {i}' if i == 1 else str(i) for i in range(1, 6)},
-            value=5,
-        ),
-    ], style={'padding': 10, 'flex': 1})
-], style={'display': 'flex', 'flex-direction': 'row'})
+    return fig
 
 if __name__ == '__main__':
      app.run_server(host="0.0.0.0", debug=True, port=8080)
